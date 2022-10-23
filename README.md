@@ -13,7 +13,8 @@ to reserve one logical processor for maintainig the GUI and showing progress of 
 Or
 
 using another GUI like PyQT5 which has a thread safe function that avoids the freezing of the pages.
-***The only way to see the progress of the search in this version is the command line***
+
+** *The only way to see the progress of the search in this version is the command line* **
 
 # You can donwload this build as an easy to install EXE file in the email_valV1 directory
 made using auto-py-to-exe.
