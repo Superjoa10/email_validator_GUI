@@ -1,6 +1,6 @@
 # Email validator GUI *Project Overview*
 This is a easy to use email validator user interface, that takes excel or csv files, selects the row that has emails, divides the file into various files to make it easier to search, and validates them, separating the valid and invalid ones, then gives you the option to exctract a csv of the valid or invalid ones.
-I plan on adding a function that analizes and gives potential reasons that the invalid emails does't exist
+I plan on adding a function that analizes and gives potential reasons that the invalid emails does't exist.
 
 
 # email_validator_GUIV1.py
@@ -10,4 +10,4 @@ It can take both csv or excel files, it turns the excel file to a csv for speedi
 ***The only way to see the progress of the search in this version is the command line***
 
 # You can donwload this build as an easy to install EXE file in the email_valV1 directory
-made using auto-py-to-exe
+made using auto-py-to-exe.
