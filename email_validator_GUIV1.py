@@ -6,6 +6,7 @@ import re
 import time
 import tkinter
 import webbrowser
+from multiprocessing import freeze_support
 from logging import PlaceHolder
 from pathlib import Path
 from tkinter import *  # type: ignore
@@ -33,11 +34,11 @@ def information():
 
     high.column("#0", width=0, stretch=NO)
     high.column("NUM_emails", anchor=W, width=105,)
-    high.column("Time", anchor=CENTER, width=40)
+    high.column("Time", anchor=CENTER, width=75)
     
     low.column("#0", width=0, stretch=NO)
     low.column("NUM_emails", anchor=W, width=105,)
-    low.column("Time", anchor=CENTER, width=40)
+    low.column("Time", anchor=CENTER, width=60)
     
     high.heading("#0", text="", anchor=W)
     high.heading("NUM_emails", text="Num. of emails", anchor=W)
@@ -48,19 +49,19 @@ def information():
     low.heading("Time", text="Time", anchor=CENTER)
     
     data_high = [
-        ["1.000", "10 M"],
-        ["5.000", "20 M"],
-        ["10.000", "60 M"],
-        ["50.000", "5 H"],
-        ["100.000", "5 H"]
+        ["1.000", "4-5 M"],
+        ["5.000", "17-20 M"],
+        ["10.000", "32 M"],
+        ["50.000", "3 H"],
+        ["100.000", "6 H"]
     ]
 
     data_low = [
-        ["1.000", "10 M"],
-        ["5.000", "20 M"],
-        ["10.000", "60 M"],
-        ["50.000", "5 H"],
-        ["100.000", "5 H"]
+        ["1.000", "N/A"],
+        ["5.000", "N/A"],
+        ["10.000", "N/A"],
+        ["50.000", "N/A"],
+        ["100.000", "N/A"]
     ]
      
     count=0
@@ -99,26 +100,69 @@ It takes this amount of time per size of the file:
 def callback(url):
     webbrowser.open_new(url)    
 
-def chose_file(): #this is the second page
+def choose_file(): #this is the second page
     global inf
     inf = Toplevel()
     inf.title("Choose file")
+    inf.geometry("750x710")
+    screen_width = inf.winfo_screenwidth()
+    screen_height = inf.winfo_screenheight()
 
-    #select arquivo e treeview
-    open_btn = Button(inf, text="Select file to search", command=select_file, padx=3, pady=2, anchor= S)
-    open_btn.pack()
-    frame = Frame(inf)
-    frame.pack(ipady=0, ipadx=200)
+    frame = Frame(inf, highlightbackground="black", highlightthickness=2.)
+    frame.grid(column=0, row=0, padx=5, pady=5)
+
     # Create a Treeview widget
     global tree
     tree = ttk.Treeview(frame)
+    tree.pack(ipady=175, ipadx=80)
     
-    global label
-    label = Label(inf, text='')
-    label.pack(pady=0, padx=0)
+    global frame_inf
+    frame_inf = Frame(inf, highlightbackground="gray", highlightthickness=2.)
+    frame_inf.grid(column=0, row=1, ipady=10, ipadx=0)
 
-    run_btn = Button(inf, text="search",command=lambda:run_main(filename) , padx=3, pady=2, anchor= S)
-    run_btn.pack()
+    #select arquivo e treeview
+    open_btn = Button(frame_inf, text="Select file to search", command=select_file, padx=3, pady=2, anchor= CENTER)
+    open_btn.grid(column= 0, row=0, padx=10, pady=5)
+
+    global frame_inf2
+    frame_inf2 = LabelFrame(inf, text="Informations from file", highlightbackground="gray", highlightthickness=1.)
+    frame_inf2.grid(column=1, row=0, padx=5, ipady=70, ipadx=25)
+
+    global label
+    label = Label(frame_inf2, anchor=W, text='''
+Status: Please select a file!
+this program accepts either Excel or CSV.''')
+    label.pack()
+
+    global label_doc
+    label_doc = Label(frame_inf2, anchor=W, text=f"")
+    label_doc.pack()
+
+    global label_size
+    label_size = Label(frame_inf2, anchor=W, text=f"")
+    label_size.pack()
+
+    label_WARNING = Label(frame_inf2, anchor=W, text="""
+THIS PAGE WON'T WORK
+WHILE THE SEARCH IS RUNNING""",
+font="bold")
+    label_WARNING.pack()
+
+    label_cool = Label(frame_inf2, anchor=E, text="""
+There is currently no way to check the 
+progress of the search, other than the console
+due to the limitations of the Tkinter program.
+""")
+    label_cool.pack(side = BOTTOM)
+
+    label_cool = Label(frame_inf2, anchor=E, text="""
+If you close this program while it's
+running, it'll leave behind some throw away 
+files, result from the division of the original
+file. If you wait for it to end it'll delete
+them automatically
+""")
+    label_cool.pack(side = BOTTOM)
 
 def select_file():
     #adds file to screan
@@ -129,8 +173,23 @@ def select_file():
                 global df
                 filename = r"{}".format(filename)
                 df = pd.read_csv(filename, sep=';')
+    
+                number_lines = int(sum(1 for row in (open(filename))))
+                label_doc.config(text=f"Type of doc: CSV")
+                label.config(text="Status: File found")
+                label_size.config(text=f"Number of lines: {number_lines}")
+
+                run_btn = Button(frame_inf, text="search", command=lambda:run_main(filename) , padx=3, pady=2, anchor= CENTER)
+                run_btn.grid(column=1, row=0, padx=10, pady=5, sticky=E)
+
             except ValueError:
                 df = pd.read_excel(filename)
+                label.config(text="Status: File found")
+                label_doc.config(text="Type of doc: Excel")
+                inf.geometry("1000x710")
+
+                run_btn = Button(frame_inf, text="search", command=lambda:run_main(filename) , padx=3, pady=2, anchor= CENTER)
+                run_btn.grid(column=1, row=0, padx=10, pady=5, sticky=E)
             except FileNotFoundError:
                 label.config(text="File Not Found")
     clear_treeview()
@@ -206,10 +265,13 @@ def main(prompt):
                     email = emoil[0]
                     #is_valid = isValid(email)
                     isexist= validate_email(email, smtp_timeout=1)
-                    print(f"""------------------------------------------------------------------------------------
+                    print(f"""
+------------------------------------------------------------------------------------
 email: {email}
 valido = {isexist}
-place = {line_count}/{rowsize}""")
+place = {line_count}/{rowsize}
+------------------------------------------------------------------------------------""")
+                    
                     if isexist == True:
                         valid_email.append(email)
                     elif isexist == None:
@@ -217,6 +279,8 @@ place = {line_count}/{rowsize}""")
                     elif isexist == False:
                         invalid_email.append(email)
 
+                    elif isexist == 'True':
+                        valid_email.append(email)
                     elif isexist == 'None':
                         invalid_email.append(email)
                     elif isexist == 'False':
@@ -299,12 +363,12 @@ Meaning that the more logical processors, the faster the search is going to be""
         else:
             print("file not found")
 
-    
     incorrect_emails= []
     correct_emails= []
 
     start__ = time.perf_counter()
     with concurrent.futures.ThreadPoolExecutor() as executor:
+        freeze_support()
         results = executor.map(main, names_list)
 
     for result in results:
@@ -314,7 +378,9 @@ Meaning that the more logical processors, the faster the search is going to be""
             incorrect_emails.append(__)
     finish__ = time.perf_counter()
     final_time = round(int(finish__- start__) / 60)
+    messagebox.showwarning("Done", " The search is done")
 
+    
     #page defining
     global end
     inf.destroy()
@@ -324,7 +390,7 @@ Meaning that the more logical processors, the faster the search is going to be""
 
     valueinfo = Label(end, text="Yay! your query is done!", padx=3, pady=2, anchor=N, font=("Times New Roman", 25))
     valueinfo.grid(column=0, row=0, columnspan = 3, ipadx=100, ipady=50)
-    valueinfo = Label(end, text=f"Your email file has {number_lines} emails, and took {final_time} minutes to check", padx=3, pady=2, anchor=W, font=("Times New Roman"))
+    valueinfo = Label(end, text=f"Your email file has {number_lines} emails, and took {final_time} minutes to check", padx=3, pady=2, anchor=W)
     valueinfo.grid(column=0, row=1, columnspan = 3)
 
     vldinfo = Label(end, text=f"From {number_lines}, there were {len(correct_emails)} valid emails", padx=3, pady=2, anchor=W)
@@ -343,6 +409,7 @@ Meaning that the more logical processors, the faster the search is going to be""
 root = Tk()
 root.title("Email validator V1")
 root.geometry("550x375")
+root.iconbitmap("C:/Users/João/Pictures/mail_box.ico")
 
 #Style 
 style = ttk.Style()
@@ -351,7 +418,7 @@ style.theme_use('default')
 main_title = Label(root, text="Email validator 2022", padx=3, pady=2, anchor=CENTER, font=("Times New Roman", 25))
 main_title.grid(column=0, row=0, columnspan = 3, ipadx=100, ipady=50)
 
-open_btn = Button(root, text="Choose you file", command=chose_file, anchor= CENTER)
+open_btn = Button(root, text="Choose you file", command=choose_file, anchor= CENTER)
 open_btn.grid(column=0, row=1, columnspan=3, ipadx=10)
 
 open_btn = Button(root, text="Informations", command=information, anchor=CENTER)
@@ -362,3 +429,4 @@ credit.grid(column=0, row=2)
 credit.bind("<Button-1>", lambda e: callback("https://github.com/Superjoa10"))
 
 mainloop()
+input()
