@@ -6,6 +6,7 @@ import re
 import time
 import tkinter
 import webbrowser
+import sys
 from multiprocessing import freeze_support
 from logging import PlaceHolder
 from pathlib import Path
@@ -17,11 +18,23 @@ import pyautogui as gui
 from validate_email import validate_email
 
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
 def information():
     global inf_
     inf_ = Toplevel()
     inf_.title("Information")
     inf_.geometry("550x400")
+    icon_select= resource_path("icons/select.ico")
+    inf_.iconbitmap(icon_select)
 
     high = ttk.Treeview(inf_)
     low = ttk.Treeview(inf_)
@@ -105,6 +118,8 @@ def choose_file(): #this is the second page
     inf = Toplevel()
     inf.title("Choose file")
     inf.geometry("750x710")
+    icon_email_search= resource_path("icons/email_search.ico")
+    inf.iconbitmap(icon_email_search)
     screen_width = inf.winfo_screenwidth()
     screen_height = inf.winfo_screenheight()
 
@@ -172,9 +187,9 @@ def select_file():
             try:
                 global df
                 filename = r"{}".format(filename)
-                df = pd.read_csv(filename, sep=';')
+                df = pd.read_csv(filename, sep=';', engine= 'python' ,encoding='cp860')
     
-                number_lines = int(sum(1 for row in (open(filename))))
+                number_lines = int(sum(1 for row in (open(filename, encoding='cp860'))))
                 label_doc.config(text=f"Type of doc: CSV")
                 label.config(text="Status: File found")
                 label_size.config(text=f"Number of lines: {number_lines}")
@@ -387,6 +402,8 @@ Meaning that the more logical processors, the faster the search is going to be""
     end = Toplevel()
     end.title("Return")
     end.geometry("600x350")
+    icon_result= resource_path("icons/result_icon.ico")
+    end.iconbitmap(icon_result)
 
     valueinfo = Label(end, text="Yay! your query is done!", padx=3, pady=2, anchor=N, font=("Times New Roman", 25))
     valueinfo.grid(column=0, row=0, columnspan = 3, ipadx=100, ipady=50)
@@ -409,7 +426,8 @@ Meaning that the more logical processors, the faster the search is going to be""
 root = Tk()
 root.title("Email validator V1")
 root.geometry("550x375")
-root.iconbitmap("C:/Users/João/Pictures/mail_box.ico")
+icon_mail_box= resource_path("icons/mail_box.ico")
+root.iconbitmap(icon_mail_box)
 
 #Style 
 style = ttk.Style()
