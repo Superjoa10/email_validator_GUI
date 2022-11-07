@@ -423,9 +423,51 @@ Meaning that the more logical processors, the faster the search is going to be""
     SAVEinfo = Label(end, text="", padx=3, pady=2, anchor=CENTER)
     SAVEinfo.grid(column=0, row=4, columnspan=2)
     
+def validate_one():#this has the search one page
+    global val, result_label, search_entry
+    val = Toplevel()
+    val.title("Information")
+    val.geometry("450x90")
+    val.minsize(450, 90)
+    val.maxsize(450, 90)
+    val_one = resource_path("icons/one_selec.ico")
+    val.iconbitmap(val_one)
+
+    search_label = Label(val, text="Search email: ")
+    search_label.grid(row=0, column=0, pady=5)
+    search_entry = Entry(val)
+    search_entry.grid(row=0, column=1, ipadx=50)
+    result_btn = Button(val, text="Search", command= search_one, anchor= CENTER)
+    result_btn.grid(row=0, column=2, padx= 5)
+
+    result_label = Label(val, text="Result:")
+    result_label.grid(row=1, column=0)
+
+def search_one():
+    email = search_entry.get()
+    isexist= validate_email(email, smtp_timeout=1.5, dns_timeout=5)
+    if isexist == True:
+        result_label.config(text="Result: True")
+    elif isexist == None:
+        result_label.config(text="Result: False")
+    elif isexist == False:
+        result_label.config(text="Result: False")
+
+    elif isexist == 'True':
+        result_label.config(text="Result: True")
+    elif isexist == 'None':
+        result_label.config(text="Result: False")
+    elif isexist == 'False':
+        result_label.config(text="Result: False")
+
+    else:
+        result_label.config(text="Result: False")
+
 root = Tk()
 root.title("Email validator V1")
 root.geometry("550x375")
+root.minsize(550, 375)
+root.maxsize(550, 375)
 icon_mail_box= resource_path("icons/mail_box.ico")
 root.iconbitmap(icon_mail_box)
 
@@ -439,11 +481,14 @@ main_title.grid(column=0, row=0, columnspan = 3, ipadx=100, ipady=50)
 open_btn = Button(root, text="Choose you file", command=choose_file, anchor= CENTER)
 open_btn.grid(column=0, row=1, columnspan=3, ipadx=10)
 
+one_btn = Button(root, text="Validate one", command=validate_one, anchor= CENTER)
+one_btn.grid(column=0, row=2, columnspan=3, ipadx=10, pady=10)
+ 
 open_btn = Button(root, text="Informations", command=information, anchor=CENTER)
-open_btn.grid(column=2, row=2, sticky=E, pady=120, padx=50)
+open_btn.grid(column=2, row=3, sticky=E, pady=70, padx=50)
 
 credit = Label(root, text="Made by Superjoa10 (Click to access my github)", padx=3, pady=2, anchor=CENTER, font=("Times New Roman", 7),fg="blue", cursor="hand2")
-credit.grid(column=0, row=2)
+credit.grid(column=0, row=3)
 credit.bind("<Button-1>", lambda e: callback("https://github.com/Superjoa10"))
 
 mainloop()
