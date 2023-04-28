@@ -1,4 +1,8 @@
 # Email validator GUI *Project Overview*
+
+*Not Working, email validation unreliable* 
+
+
 This is a easy to use email validator user interface, that takes excel or csv files, selects the row that has emails, divides the file into various files to make it easier to search, and validates them, separating the valid and invalid ones, then gives you the option to exctract a csv of the valid or invalid ones.
 I plan on adding a function that analizes and gives potential reasons that the invalid emails does't exist.
 
